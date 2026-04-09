@@ -4,6 +4,9 @@ from core.menu import (
     get_sub_choice
 )
 from core.input_handler import get_action, get_text_input, get_key_input, ask_generate_key
+from utils.validators import is_valid_menu_choice, validate_key_length
+
+
 
 def handle_post_action():
     next_choice = ask_next_step()
@@ -64,6 +67,15 @@ def handle_symmetric():
             elif action == "2":  # Decrypt
                 ciphertext = get_text_input("Enter ciphertext")
                 key = get_key_input()
+                
+                if algo_choice == "2":  # DES
+                    if not validate_key_length(key, [8]):
+                        print_error("DES key must be 8 characters long.")
+                        continue
+                elif algo_choice == "3":  # 3DES
+                    if not validate_key_length(key, [16, 24]):
+                        print_error("3DES key must be 16 or 24 characters long.")
+                        continue
 
                 plaintext = "<<plaintext placeholder>>"
 
@@ -136,7 +148,9 @@ def main():
             print("Exiting program...")
             break
         else:
-            print("Invalid choice. Please try again.")
+            if not is_valid_menu_choice(choice, {"1", "2", "3", "0"}):
+                print_error("Invalid main menu choice.")
+                continue
 
 if __name__ == "__main__":
     main()
