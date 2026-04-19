@@ -6,6 +6,10 @@ from core.menu import (
 from core.input_handler import get_action, get_text_input, get_key_input, ask_generate_key
 from utils.validators import is_valid_menu_choice, validate_key_length
 
+from symmetric.des import DESTool
+from symmetric.tripledes import TripleDESTool
+from utils.keygen import generate_des_key, generate_3des_key
+
 
 
 def handle_post_action():
@@ -39,22 +43,47 @@ def handle_symmetric():
                 plaintext = get_text_input("Enter plaintext")
                 use_auto_key = ask_generate_key()
 
-                if use_auto_key:
-                    key = "AUTO_GENERATED"
+                if algo_choice == "2":  # DES
+                    if use_auto_key:
+                        key = generate_des_key()
+                    else:
+                        key = get_key_input("Enter DES key (8 chars)")
+
+                    ciphertext = DESTool.encrypt(plaintext, key)
+
+                    print_result(
+                        title="Execution Result",
+                        algorithm="DES",
+                        action="Encrypt",
+                        input_data=plaintext,
+                        key=key,
+                        output_data=ciphertext
+                    )
+
+                elif algo_choice == "3":  # 3DES
+                    if use_auto_key:
+                        key_size = input("Choose 3DES key size (16 or 24): ").strip()
+                        if key_size not in {"16", "24"}:
+                            print_error("3DES key size must be 16 or 24.")
+                            continue
+                        key = generate_3des_key(int(key_size))
+                    else:
+                        key = get_key_input("Enter 3DES key (16 or 24 chars)")
+
+                    ciphertext = TripleDESTool.encrypt(plaintext, key)
+
+                    print_result(
+                        title="Execution Result",
+                        algorithm="3DES",
+                        action="Encrypt",
+                        input_data=plaintext,
+                        key=key,
+                        output_data=ciphertext
+                    )
+
                 else:
-                    key = get_key_input()
-
-                # Chỗ này sau này thay bằng hàm AES/DES/3DES thật
-                ciphertext = "<<ciphertext placeholder>>"
-
-                print_result(
-                    title="Execution Result",
-                    algorithm="AES",
-                    action="Encrypt",
-                    input_data=plaintext,
-                    key=key,
-                    output_data=ciphertext
-                )
+                    print_error("AES module is not completed yet.")
+                    continue
 
                 decision = handle_post_action()
                 if decision == "retry":
@@ -63,30 +92,45 @@ def handle_symmetric():
                     break
                 elif decision == "exit":
                     raise SystemExit
-
             elif action == "2":  # Decrypt
                 ciphertext = get_text_input("Enter ciphertext")
                 key = get_key_input()
-                
+
                 if algo_choice == "2":  # DES
                     if not validate_key_length(key, [8]):
                         print_error("DES key must be 8 characters long.")
                         continue
+
+                    plaintext = DESTool.decrypt(ciphertext, key)
+
+                    print_result(
+                        title="Execution Result",
+                        algorithm="DES",
+                        action="Decrypt",
+                        input_data=ciphertext,
+                        key=key,
+                        output_data=plaintext
+                    )
+
                 elif algo_choice == "3":  # 3DES
                     if not validate_key_length(key, [16, 24]):
                         print_error("3DES key must be 16 or 24 characters long.")
                         continue
 
-                plaintext = "<<plaintext placeholder>>"
+                    plaintext = TripleDESTool.decrypt(ciphertext, key)
 
-                print_result(
-                    title="Execution Result",
-                    algorithm="AES",
-                    action="Decrypt",
-                    input_data=ciphertext,
-                    key=key,
-                    output_data=plaintext
-                )
+                    print_result(
+                        title="Execution Result",
+                        algorithm="3DES",
+                        action="Decrypt",
+                        input_data=ciphertext,
+                        key=key,
+                        output_data=plaintext
+                    )
+
+                else:
+                    print_error("AES module is not completed yet.")
+                    continue
 
                 decision = handle_post_action()
                 if decision == "retry":
@@ -95,10 +139,8 @@ def handle_symmetric():
                     break
                 elif decision == "exit":
                     raise SystemExit
-
             else:
                 print("Invalid action. Please try again.")
-
 
 
 def get_rsa_action():

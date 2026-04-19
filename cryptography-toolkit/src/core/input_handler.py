@@ -1,5 +1,4 @@
 
-
 from utils.validators import is_non_empty
 
 def get_text_input(label="Enter text"):
@@ -9,9 +8,10 @@ def get_text_input(label="Enter text"):
             return value
         print("Input cannot be empty. Please try again.")
 
-def get_key_input():
+
+def get_key_input(label="Enter key"):
     while True:
-        key = input("Enter key: ").strip()
+        key = input(f"{label}: ").strip()
         if is_non_empty(key):
             return key
         print("Key cannot be empty. Please try again.")
@@ -25,12 +25,22 @@ def get_action():
             return choice
         print("Invalid choice. Please try again.")
 
-def get_text_input(label="Enter text"):
-    return input(f"{label}: ").strip()
-
-def get_key_input():
-    return input("Enter key: ").strip()
-
 def ask_generate_key():
     answer = input("Generate random key? (y/n): ").strip().lower()
     return answer == "y"
+
+
+def ask_generate_key():
+    while True:
+        answer = input("Generate random key? (y/n): ").strip().lower()
+        if answer in {"y", "n"}:
+            return answer == "y"
+        print("Invalid choice. Please enter y or n.")
+
+
+def ask_try_again():
+    while True:
+        answer = input("Try again? (y/n): ").strip().lower()
+        if answer in {"y", "n"}:
+            return answer == "y"
+        print("Invalid choice. Please enter y or n.")
