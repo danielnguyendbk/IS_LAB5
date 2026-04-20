@@ -3,13 +3,14 @@ from core.menu import (
     show_symmetric_menu, show_asymmetric_menu, show_hash_menu,
     get_sub_choice
 )
-from core.input_handler import get_action, get_text_input, get_key_input, ask_generate_key
+from core.input_handler import get_action, get_text_input, get_key_input, ask_generate_key, get_text_input
 from utils.validators import is_valid_menu_choice, validate_key_length
 
 from symmetric.des import DESTool
 from symmetric.tripledes import TripleDESTool
 from utils.keygen import generate_des_key, generate_3des_key
-
+from asymmetric.rsa_tool import generate_keypair, encrypt, decrypt
+from core.output_formatter import print_result, print_error
 
 
 def handle_post_action():
@@ -169,22 +170,43 @@ def handle_asymmetric():
                 break
 
             elif action == "1":
-                public_key = "<<public key placeholder>>"
-                private_key = "<<private key placeholder>>"
+                keys = generate_keypair()
+
+                if "error" in keys:
+                    print_error(keys["error"])
+                    continue
+
+                public_key = keys["public_key"]
+                private_key = keys["private_key"]
 
                 print_result(
                     title="RSA Key Generation Result",
                     algorithm="RSA",
                     action="Generate Key Pair",
                     input_data="N/A",
-                    key=f"Public Key: {public_key}\nPrivate Key: {private_key}",
+                    key=f"Public Key:\n{public_key}\nPrivate Key:\n{private_key}",
                     output_data="Key pair generated successfully"
                 )
 
             elif action == "2":
                 plaintext = get_text_input("Enter plaintext")
                 public_key = get_text_input("Enter public key")
-                ciphertext = "<<rsa ciphertext placeholder>>"
+
+                try:
+                    ciphertext = encrypt(plaintext, public_key)
+
+                    print_result(
+                        title="RSA Encryption Result",
+                        algorithm="RSA",
+                        action="Encrypt",
+                        input_data=plaintext,
+                        key=public_key,
+                        output_data=ciphertext
+                    )
+
+                except Exception as e:
+                    print_error(str(e))
+                    continue
 
                 print_result(
                     title="Execution Result",
@@ -198,7 +220,22 @@ def handle_asymmetric():
             elif action == "3":
                 ciphertext = get_text_input("Enter ciphertext")
                 private_key = get_text_input("Enter private key")
-                plaintext = "<<rsa plaintext placeholder>>"
+
+                try:
+                    plaintext = decrypt(ciphertext, private_key)
+
+                    print_result(
+                        title="RSA Decryption Result",
+                        algorithm="RSA",
+                        action="Decrypt",
+                        input_data=ciphertext,
+                        key=private_key,
+                        output_data=plaintext
+                    )
+
+                except Exception as e:
+                    print_error(str(e))
+                    continue
 
                 print_result(
                     title="Execution Result",
