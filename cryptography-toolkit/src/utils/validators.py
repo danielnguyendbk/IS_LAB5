@@ -27,3 +27,12 @@ def validate_3des_key(key: str) -> bytes:
     if not validate_key_length(key, [16, 24]):
         raise ValueError("3DES key must be either 16 or 24 characters.")
     return key.encode("utf-8")
+
+
+#Đình Thạch
+def validate_aes_key(key: str) -> bytes:
+    """Validate if the AES key has the correct length (16, 24, or 32 characters)."""
+    validate_non_empty(key, "AES key")
+    if not validate_key_length(key, [16, 24, 32]):
+        raise ValueError("AES key must be 16, 24, or 32 characters long.")
+    return key.encode("utf-8")
