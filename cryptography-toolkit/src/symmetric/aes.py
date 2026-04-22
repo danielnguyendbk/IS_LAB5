@@ -34,6 +34,7 @@ def decrypt_aes(ciphertext_b64: str, key: bytes, mode: str = 'CBC') -> str:
         raw_data = base64.b64decode(ciphertext_b64)
         
         if mode == 'CBC':
+            iv = raw_data[:AES.block_size]
             ct = raw_data[AES.block_size:]
             cipher = AES.new(key, AES.MODE_CBC, iv)
             pt_padded = cipher.decrypt(ct)
