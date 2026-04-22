@@ -3,7 +3,7 @@ from core.menu import (
     show_symmetric_menu, show_asymmetric_menu, show_hash_menu,
     get_sub_choice
 )
-from core.input_handler import get_action, get_text_input, get_key_input, ask_generate_key, get_text_input
+from core.input_handler import get_action, get_text_input, get_key_input, ask_generate_key, get_multiline_input
 from utils.validators import is_valid_menu_choice, validate_key_length
 
 from symmetric.des import DESTool
@@ -190,7 +190,7 @@ def handle_asymmetric():
 
             elif action == "2":
                 plaintext = get_text_input("Enter plaintext")
-                public_key = get_text_input("Enter public key")
+                public_key = get_multiline_input("Enter public key (PEM, end with empty line):")
 
                 try:
                     ciphertext = encrypt(plaintext, public_key)
@@ -208,18 +208,11 @@ def handle_asymmetric():
                     print_error(str(e))
                     continue
 
-                print_result(
-                    title="Execution Result",
-                    algorithm="RSA",
-                    action="Encrypt",
-                    input_data=plaintext,
-                    key=public_key,
-                    output_data=ciphertext
-                )
+    
 
             elif action == "3":
                 ciphertext = get_text_input("Enter ciphertext")
-                private_key = get_text_input("Enter private key")
+                private_key = get_multiline_input("Enter private key (PEM, end with empty line):")
 
                 try:
                     plaintext = decrypt(ciphertext, private_key)
@@ -237,14 +230,7 @@ def handle_asymmetric():
                     print_error(str(e))
                     continue
 
-                print_result(
-                    title="Execution Result",
-                    algorithm="RSA",
-                    action="Decrypt",
-                    input_data=ciphertext,
-                    key=private_key,
-                    output_data=plaintext
-                )
+               
 
             else:
                 print_error("Invalid RSA action.")
