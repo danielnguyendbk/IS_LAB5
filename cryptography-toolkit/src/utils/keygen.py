@@ -13,3 +13,9 @@ def to_base64(data: bytes) -> str:
 def from_base64(data: str) -> bytes:
     return base64.b64decode(data.encode("utf-8"))
 
+
+def generate_aes_key(key_size_bits=256) -> bytes:
+    """Generate a random AES key (default 256-bit)."""
+    if key_size_bits not in [128, 192, 256]:
+        raise ValueError("AES key size must be 128, 192, or 256 bits.")
+    return get_random_bytes(key_size_bits // 8)
