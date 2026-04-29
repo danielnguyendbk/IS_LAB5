@@ -31,8 +31,19 @@ def validate_3des_key(key: str) -> bytes:
 
 #Đình Thạch
 def validate_aes_key(key: str) -> bytes:
-    """Validate if the AES key has the correct length (16, 24, or 32 characters)."""
+    """
+    Validate AES key.
+    Hỗ trợ cả chuỗi ký tự thường (16, 24, 32 chars) và chuỗi Hex (32, 48, 64 chars).
+    """
     validate_non_empty(key, "AES key")
-    if not validate_key_length(key, [16, 24, 32]):
-        raise ValueError("AES key must be 16, 24, or 32 characters long.")
-    return key.encode("utf-8")
+
+    if len(key) in [32, 48, 64]:
+        try:
+            return bytes.fromhex(key)
+        except ValueError:
+            pass
+
+    if validate_key_length(key, [16, 24, 32]):
+        return key.encode("utf-8")
+
+    raise ValueError("AES key must be 16, 24, or 32 bytes (or 32, 48, 64 hex characters).")
