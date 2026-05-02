@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+cryptography-toolkit/src/**/__pycache__/
+cryptography-toolkit/src/**/*.pyc
+
+.venv/
+venv/
+.env
