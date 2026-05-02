@@ -44,3 +44,18 @@ def ask_try_again():
         if answer in {"y", "n"}:
             return answer == "y"
         print("Invalid choice. Please enter y or n.")
+
+
+def get_multiline_input(label="Enter text (end with empty line)"):
+    print(label)
+    lines = []
+    while True:
+        line = input()
+        if line == "":
+            break
+        lines.append(line)
+    value = "\n".join(lines)
+    if is_non_empty(value):
+        return value
+    print("Input cannot be empty. Please try again.")
+    return get_multiline_input(label)
