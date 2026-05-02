@@ -2,6 +2,7 @@
 from utils.validators import is_non_empty
 
 def get_text_input(label="Enter text"):
+
     while True:
         value = input(f"{label}: ").strip()
         if is_non_empty(value):

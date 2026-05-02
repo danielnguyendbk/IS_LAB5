@@ -18,6 +18,79 @@ from asymmetric.rsa_tool import generate_keypair, encrypt, decrypt
 from core.output_formatter import print_result, print_error
 
 
+def show_aes_encrypt_sample():
+    print("\n--- Quick Test Sample: AES Encrypt ---")
+    print("Plaintext: hello from ptit")
+    print("Key      : 1234567890abcdef")
+    print("Note     : AES key must be 16, 24, or 32 characters.")
+    print("--------------------------------------\n")
+
+
+def show_aes_decrypt_sample():
+    print("\n--- Quick Test Sample: AES Decrypt ---")
+    print("Ciphertext: Paste ciphertext from AES encrypt result")
+    print("Key       : 1234567890abcdef")
+    print("--------------------------------------\n")
+
+
+def show_des_encrypt_sample():
+    print("\n--- Quick Test Sample: DES Encrypt ---")
+    print("Plaintext: hello from ptit")
+    print("Key      : 12345678")
+    print("Note     : DES key must be exactly 8 characters.")
+    print("--------------------------------------\n")
+
+
+def show_des_decrypt_sample():
+    print("\n--- Quick Test Sample: DES Decrypt ---")
+    print("Ciphertext: Paste ciphertext from DES encrypt result")
+    print("Key       : 12345678")
+    print("--------------------------------------\n")
+
+
+def show_3des_encrypt_sample():
+    print("\n--- Quick Test Sample: 3DES Encrypt ---")
+    print("Plaintext: hello from ptit")
+    print("Key      : 1234567890abcdef")
+    print("Note     : 3DES key must be 16 or 24 characters.")
+    print("--------------------------------------\n")
+
+
+def show_3des_decrypt_sample():
+    print("\n--- Quick Test Sample: 3DES Decrypt ---")
+    print("Ciphertext: Paste ciphertext from 3DES encrypt result")
+    print("Key       : 1234567890abcdef")
+    print("--------------------------------------\n")
+
+
+def show_rsa_generate_sample():
+    print("\n--- Quick Test Sample: RSA Key Pair ---")
+    print("Choose this option to generate public/private key pair.")
+    print("Copy public key for encryption.")
+    print("Copy private key for decryption.")
+    print("--------------------------------------\n")
+
+
+def show_rsa_encrypt_sample():
+    print("\n--- Quick Test Sample: RSA Encrypt ---")
+    print("Plaintext : hello from ptit")
+    print("Public Key: Paste public key generated from option 1")
+    print("--------------------------------------\n")
+
+
+def show_rsa_decrypt_sample():
+    print("\n--- Quick Test Sample: RSA Decrypt ---")
+    print("Ciphertext : Paste ciphertext from RSA encrypt result")
+    print("Private Key: Paste private key generated from option 1")
+    print("--------------------------------------\n")
+
+
+def show_hash_sample():
+    print("\n--- Quick Test Sample: Hash ---")
+    print("Text: hello from ptit")
+    print("--------------------------------------\n")
+
+
 def handle_post_action():
     next_choice = ask_next_step()
     if next_choice == "1":
@@ -46,6 +119,13 @@ def handle_symmetric():
                 break
 
             elif action == "1":  # Encrypt
+                if algo_choice == "1":
+                    show_aes_encrypt_sample()
+                elif algo_choice == "2":
+                    show_des_encrypt_sample()
+                elif algo_choice == "3":
+                    show_3des_encrypt_sample()
+
                 plaintext = get_text_input("Enter plaintext")
                 use_auto_key = ask_generate_key()
 
@@ -121,6 +201,13 @@ def handle_symmetric():
                 elif decision == "exit":
                     raise SystemExit
             elif action == "2":  # Decrypt
+                if algo_choice == "1":
+                    show_aes_decrypt_sample()
+                elif algo_choice == "2":
+                    show_des_decrypt_sample()
+                elif algo_choice == "3":
+                    show_3des_decrypt_sample()
+
                 ciphertext = get_text_input("Enter ciphertext")
                 key = get_key_input()
 
@@ -214,6 +301,7 @@ def handle_asymmetric():
                 break
 
             elif action == "1":
+                show_rsa_generate_sample()
                 keys = generate_keypair()
 
                 if "error" in keys:
@@ -233,6 +321,7 @@ def handle_asymmetric():
                 )
 
             elif action == "2":
+                show_rsa_encrypt_sample()
                 plaintext = get_text_input("Enter plaintext")
                 public_key = get_multiline_input("Enter public key (PEM, end with empty line):")
 
@@ -255,6 +344,7 @@ def handle_asymmetric():
     
 
             elif action == "3":
+                show_rsa_decrypt_sample()
                 ciphertext = get_text_input("Enter ciphertext")
                 private_key = get_multiline_input("Enter private key (PEM, end with empty line):")
 
@@ -300,6 +390,7 @@ def handle_hash():
             print_error("Invalid hash algorithm choice.")
             continue
 
+        show_hash_sample()
         text = get_text_input("Enter text")
 
         if algo_choice == "1":
