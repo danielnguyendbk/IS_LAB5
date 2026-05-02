@@ -3,11 +3,16 @@ from core.menu import (
     show_symmetric_menu, show_asymmetric_menu, show_hash_menu,
     get_sub_choice
 )
+from core.input_handler import get_action, get_text_input, get_key_input, ask_generate_key
+from utils.validators import is_valid_menu_choice, validate_key_length, validate_aes_key
 from core.input_handler import get_action, get_text_input, get_key_input, ask_generate_key, get_multiline_input
 from utils.validators import is_valid_menu_choice, validate_key_length
 
+from symmetric.aes import encrypt_aes, decrypt_aes
 from symmetric.des import DESTool
 from symmetric.tripledes import TripleDESTool
+from utils.keygen import generate_des_key, generate_3des_key, generate_aes_key
+
 from utils.keygen import generate_des_key, generate_3des_key
 from asymmetric.rsa_tool import generate_keypair, encrypt, decrypt
 from core.output_formatter import print_result, print_error
@@ -82,8 +87,30 @@ def handle_symmetric():
                         output_data=ciphertext
                     )
 
+                elif algo_choice == "1":  # AES
+                    if use_auto_key:
+                        key = generate_aes_key(256)
+                    else:
+                        key_input = get_key_input("Enter AES key (16, 24, or 32 chars)")
+                        try:
+                            key = validate_aes_key(key_input)
+                        except ValueError as e:
+                            print_error(str(e))
+                            continue
+
+                    ciphertext = encrypt_aes(plaintext, key, mode='CBC')
+
+                    print_result(
+                        title="Execution Result",
+                        algorithm="AES",
+                        action="Encrypt",
+                        input_data=plaintext,
+                        key=key.hex() if isinstance(key, bytes) else key,
+                        output_data=ciphertext
+                    )
+
                 else:
-                    print_error("AES module is not completed yet.")
+                    print_error("Algorithm module is not completed yet.")
                     continue
 
                 decision = handle_post_action()
@@ -129,8 +156,25 @@ def handle_symmetric():
                         output_data=plaintext
                     )
 
+                elif algo_choice == "1":  # AES
+                    try:
+                        key_bytes = validate_aes_key(key)
+                        plaintext = decrypt_aes(ciphertext, key_bytes, mode='CBC')
+
+                        print_result(
+                            title="Execution Result",
+                            algorithm="AES",
+                            action="Decrypt",
+                            input_data=ciphertext,
+                            key=key,
+                            output_data=plaintext
+                        )
+                    except Exception as e:
+                        print_error(str(e))
+                        continue
+
                 else:
-                    print_error("AES module is not completed yet.")
+                    print_error("Algorithm module is not completed yet.")
                     continue
 
                 decision = handle_post_action()
