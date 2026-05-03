@@ -17,13 +17,13 @@ Bộ công cụ CLI cho mã hóa đối xứng (AES, DES, 3DES), mã hóa bất 
 
 Cài đặt phụ thuộc (từ thư mục repo cha):
 ```
-py -m pip install -r cryptography-toolkit\requirements.txt
+py -m pip install -r requirements.txt
 ```
 
 ## Cách chạy
 Từ thư mục repo cha:
 ```
-py cryptography-toolkit\src\main.py
+py src\main.py
 ```
 
 ## Cấu trúc thư mục
