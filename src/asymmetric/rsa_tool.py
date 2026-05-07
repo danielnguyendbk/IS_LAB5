@@ -1,86 +1,64 @@
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
-from cryptography.hazmat.primitives import serialization, hashes
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Hash import SHA256
 from utils.encoding import encode_base64, decode_base64
 
 
-# =====================
-# Generate Key Pair
-# =====================
+
+
 def generate_keypair():
     try:
-        private_key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=2048
-        )
+        key = RSA.generate(2048)
 
-        public_key = private_key.public_key()
-
-        private_pem = private_key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption()
-        )
-
-        public_pem = public_key.public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
-        )
+        private_pem = key.export_key(format="PEM").decode("utf-8")
+        public_pem = key.publickey().export_key(format="PEM").decode("utf-8")
 
         return {
-            "public_key": public_pem.decode(),
-            "private_key": private_pem.decode()
+            "public_key": public_pem,
+            "private_key": private_pem
         }
 
     except Exception as e:
-        return {"error": str(e)}
+        raise ValueError(f"RSA key generation failed: {str(e)}")
 
 
-# =====================
-# Encrypt
-# =====================
 def encrypt(plaintext, public_key_pem):
     try:
-        public_key = serialization.load_pem_public_key(
-            public_key_pem.encode()
-        )
+        if not plaintext or not plaintext.strip():
+            raise ValueError("Plaintext cannot be empty.")
 
-        ciphertext = public_key.encrypt(
-            plaintext.encode(),
-            padding.OAEP(
-                mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None
+        public_key = RSA.import_key(public_key_pem)
+
+        if public_key.has_private():
+            raise ValueError(
+                "RSA encryption should use a public key. "
+                "Using a private key belongs to digital signature, not normal encryption."
             )
-        )
+
+        cipher = PKCS1_OAEP.new(public_key, hashAlgo=SHA256)
+        ciphertext = cipher.encrypt(plaintext.encode("utf-8"))
 
         return encode_base64(ciphertext)
 
     except Exception as e:
-        return f"Error: {str(e)}"
+        raise ValueError(f"RSA encryption failed: {str(e)}")
 
 
-# =====================
-# Decrypt
-# =====================
 def decrypt(ciphertext_b64, private_key_pem):
     try:
-        private_key = serialization.load_pem_private_key(
-            private_key_pem.encode(),
-            password=None
-        )
+        if not ciphertext_b64 or not ciphertext_b64.strip():
+            raise ValueError("Ciphertext cannot be empty.")
+
+        private_key = RSA.import_key(private_key_pem)
+
+        if not private_key.has_private():
+            raise ValueError("RSA decryption requires a private key.")
 
         ciphertext = decode_base64(ciphertext_b64)
+        cipher = PKCS1_OAEP.new(private_key, hashAlgo=SHA256)
 
-        plaintext = private_key.decrypt(
-            ciphertext,
-            padding.OAEP(
-                mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None
-            )
-        )
-
-        return plaintext.decode()
+        plaintext = cipher.decrypt(ciphertext)
+        return plaintext.decode("utf-8")
 
     except Exception as e:
-        return f"Error: {str(e)}"
+        raise ValueError(f"RSA decryption failed: {str(e)}")
