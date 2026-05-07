@@ -47,27 +47,3 @@ def validate_aes_key(key: str) -> bytes:
         return key.encode("utf-8")
 
     raise ValueError("AES key must be 16, 24, or 32 bytes (or 32, 48, 64 hex characters).")
-
-
-def validate_rsa_public_key(public_key_pem: str) -> str:
-    validate_non_empty(public_key_pem, "RSA public key")
-
-    if "-----BEGIN PUBLIC KEY-----" not in public_key_pem:
-        raise ValueError("RSA public key must start with -----BEGIN PUBLIC KEY-----")
-
-    if "-----END PUBLIC KEY-----" not in public_key_pem:
-        raise ValueError("RSA public key must end with -----END PUBLIC KEY-----")
-
-    return public_key_pem.strip()
-
-
-def validate_rsa_private_key(private_key_pem: str) -> str:
-    validate_non_empty(private_key_pem, "RSA private key")
-
-    if "-----BEGIN PRIVATE KEY-----" not in private_key_pem:
-        raise ValueError("RSA private key must start with -----BEGIN PRIVATE KEY-----")
-
-    if "-----END PRIVATE KEY-----" not in private_key_pem:
-        raise ValueError("RSA private key must end with -----END PRIVATE KEY-----")
-
-    return private_key_pem.strip()

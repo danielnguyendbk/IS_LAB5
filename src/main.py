@@ -4,7 +4,6 @@ from core.menu import (
     get_sub_choice
 )
 from core.input_handler import get_action, get_text_input, get_key_input, ask_generate_key
-from hash.digest_tool import hash_processor
 from utils.validators import is_valid_menu_choice, validate_key_length, validate_aes_key
 from core.input_handler import get_action, get_text_input, get_key_input, ask_generate_key, get_multiline_input
 from utils.validators import is_valid_menu_choice, validate_key_length
@@ -102,26 +101,16 @@ def handle_post_action():
         return "exit"
     return "retry"
 
-def get_valid_algorithm_choice(valid_choices: set[str], menu_name: str = "algorithm") -> str:
-    while True:
-        choice = get_sub_choice().strip()
-
-        if choice in valid_choices:
-            return choice
-
-        print_error(
-            f"Invalid {menu_name} choice. "
-            f"Please choose one of: {', '.join(sorted(valid_choices))}."
-        )
-
 def handle_symmetric():
     while True:
         show_symmetric_menu()
-        algo_choice = get_valid_algorithm_choice({"0", "1", "2", "3"}, "algorithm")
+        algo_choice = get_sub_choice()
 
         if algo_choice == "0":
             break
-        
+        elif algo_choice not in {"1", "2", "3"}:
+            print("Invalid choice. Please try again.")
+            continue
 
         while True:
             action = get_action()
@@ -286,40 +275,24 @@ def handle_symmetric():
                 print("Invalid action. Please try again.")
 
 
-def ask_use_saved_key(key_type):
-    while True:
-        answer = input(f"Use last generated {key_type}? (y/n): ").strip().lower()
-        if answer in {"y", "n"}:
-            return answer == "y"
-        print_error("Invalid choice. Please enter y or n.")
-    
 def get_rsa_action():
     print("\n1. Generate Key Pair")
     print("2. Encrypt")
     print("3. Decrypt")
     print("0. Back")
-
-    while True:
-        choice = input("Choose an action: ").strip()
-
-        if choice in {"1", "2", "3", "0"}:
-            return choice
-
-        print_error("Invalid RSA action. Please choose 1, 2, 3, or 0.")
+    return input("Choose an action: ").strip()
 
 
 def handle_asymmetric():
-    last_public_key = None
-    last_private_key = None
-    last_ciphertext = None
-
     while True:
         show_asymmetric_menu()
-        algo_choice = get_valid_algorithm_choice({"1", "0"}, "asymmetric algorithm")
+        algo_choice = get_sub_choice()
 
         if algo_choice == "0":
             break
-    
+        elif algo_choice != "1":
+            print_error("Invalid asymmetric algorithm choice.")
+            continue
 
         while True:
             action = get_rsa_action()
@@ -329,38 +302,31 @@ def handle_asymmetric():
 
             elif action == "1":
                 show_rsa_generate_sample()
+                keys = generate_keypair()
 
-                try:
-                    keys = generate_keypair()
-
-                    last_public_key = keys["public_key"]
-                    last_private_key = keys["private_key"]
-
-                    print_result(
-                        title="RSA Key Generation Result",
-                        algorithm="RSA",
-                        action="Generate Key Pair",
-                        input_data="N/A",
-                        key=f"Public Key:\n{last_public_key}\nPrivate Key:\n{last_private_key}",
-                        output_data="Key pair generated successfully. You can now use this key pair for encryption/decryption."
-                    )
-
-                except Exception as e:
-                    print_error(str(e))
+                if "error" in keys:
+                    print_error(keys["error"])
                     continue
+
+                public_key = keys["public_key"]
+                private_key = keys["private_key"]
+
+                print_result(
+                    title="RSA Key Generation Result",
+                    algorithm="RSA",
+                    action="Generate Key Pair",
+                    input_data="N/A",
+                    key=f"Public Key:\n{public_key}\nPrivate Key:\n{private_key}",
+                    output_data="Key pair generated successfully"
+                )
 
             elif action == "2":
                 show_rsa_encrypt_sample()
                 plaintext = get_text_input("Enter plaintext")
-
-                if last_public_key is not None and ask_use_saved_key("public key"):
-                    public_key = last_public_key
-                else:
-                    public_key = get_multiline_input("Enter public key (PEM, end with empty line):")
+                public_key = get_multiline_input("Enter public key (PEM, end with empty line):")
 
                 try:
                     ciphertext = encrypt(plaintext, public_key)
-                    last_ciphertext = ciphertext
 
                     print_result(
                         title="RSA Encryption Result",
@@ -375,18 +341,12 @@ def handle_asymmetric():
                     print_error(str(e))
                     continue
 
+    
+
             elif action == "3":
                 show_rsa_decrypt_sample()
-
-                if last_ciphertext is not None and ask_use_saved_key("ciphertext"):
-                    ciphertext = last_ciphertext
-                else:
-                    ciphertext = get_text_input("Enter ciphertext")
-
-                if last_private_key is not None and ask_use_saved_key("private key"):
-                    private_key = last_private_key
-                else:
-                    private_key = get_multiline_input("Enter private key (PEM, end with empty line):")
+                ciphertext = get_text_input("Enter ciphertext")
+                private_key = get_multiline_input("Enter private key (PEM, end with empty line):")
 
                 try:
                     plaintext = decrypt(ciphertext, private_key)
@@ -404,6 +364,8 @@ def handle_asymmetric():
                     print_error(str(e))
                     continue
 
+               
+
             else:
                 print_error("Invalid RSA action.")
                 continue
@@ -416,23 +378,27 @@ def handle_asymmetric():
             elif decision == "exit":
                 raise SystemExit
 
+
 def handle_hash():
     while True:
         show_hash_menu()
-        algo_choice = get_valid_algorithm_choice({"1", "2", "0"}, "hash algorithm")
+        algo_choice = get_sub_choice()
 
         if algo_choice == "0":
             break
-        
+        elif algo_choice not in {"1", "2"}:
+            print_error("Invalid hash algorithm choice.")
+            continue
+
         show_hash_sample()
         text = get_text_input("Enter text")
 
         if algo_choice == "1":
             algorithm_name = "MD5"
-            digest = hash_processor(text, "MD5")
+            digest = "<<md5 placeholder>>"
         else:
             algorithm_name = "SHA-256"
-            digest = hash_processor(text, "SHA-256")
+            digest = "<<sha256 placeholder>>"
 
         print_result(
             title="Execution Result",
@@ -467,7 +433,7 @@ def print_error(message):
     print(f"[ERROR] {message}")
 
 def ask_next_step():
-    print("\n1. Continue")
+    print("\n1. Try Again")
     print("2. Back to Menu")
     print("0. Exit")
     return input("Choose next step: ").strip()
